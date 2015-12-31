@@ -129,6 +129,7 @@ impl FromWide for PathBuf {
 unsafe extern "system" fn windowproc(handle: HWND, msg: UINT, wparam: WPARAM, lparam: LPARAM) -> LRESULT {
     match msg{
         WM_DESTROY => {
+            println!("Received quit message");
             PostQuitMessage(0);
         }
         _ => {}
@@ -162,13 +163,11 @@ fn main() {
     unsafe{
         RegisterClassW(&wc);
     }
-    println!("Hello, world! {:p}", hinstance);
     let hwnd = unsafe{ user32::CreateWindowExW(0, wc.lpszClassName, wc.lpszClassName,
                 WS_OVERLAPPEDWINDOW | WS_VISIBLE,
                 100, 100, 350, 250, ptr::null_mut(), ptr::null_mut(), hinstance, ptr::null_mut())
             };
     unsafe{ShowWindow(hwnd, 9);}
-    println!("Hello, world! {:p}", hinstance);
     unsafe{UpdateWindow(hwnd);}
     unsafe{
         let mut msg: MSG = MSG{
@@ -183,6 +182,6 @@ fn main() {
           DispatchMessageW(&mut msg);
         }
     }
-    println!("Hello, world! {:p}", hinstance);
+    println!("quitting..");
 
 }
