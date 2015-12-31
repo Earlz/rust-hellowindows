@@ -1,0 +1,10 @@
+[package]
+name = "hellowindows"
+version = "0.1.0"
+authors = ["Jordan Earls <earlz@earlz.net>"]
+
+[dependencies]
+winapi="*"
+user32-sys="*"
+kernel32-sys="*"
+encoding = "0.2.*"
