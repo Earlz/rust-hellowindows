@@ -15,63 +15,7 @@ use std::slice;
 use encoding::all::UTF_16LE;
 use encoding::{Encoding, EncoderTrap};
 
-//copied code from tutorial at http://zetcode.com/gui/winapi/window/
-
-/*
-MSG  msg;
-HWND hwnd;
-WNDCLASSW wc;
-
-wc.style         = CS_HREDRAW | CS_VREDRAW;
-wc.cbClsExtra    = 0;
-wc.cbWndExtra    = 0;
-wc.lpszClassName = L"Window";
-wc.hInstance     = hInstance;
-wc.hbrBackground = GetSysColorBrush(COLOR_3DFACE);
-wc.lpszMenuName  = NULL;
-wc.lpfnWndProc   = WndProc;
-wc.hCursor       = LoadCursor(NULL, IDC_ARROW);
-wc.hIcon         = LoadIcon(NULL, IDI_APPLICATION);
-
-RegisterClassW(&wc);
-hwnd = CreateWindowW( wc.lpszClassName, L"Window",
-              WS_OVERLAPPEDWINDOW | WS_VISIBLE,
-              100, 100, 350, 250, NULL, NULL, hInstance, NULL);
-
-ShowWindow(hwnd, nCmdShow);
-UpdateWindow(hwnd);
-
-while( GetMessage(&msg, NULL, 0, 0)) {
-  DispatchMessage(&msg);
-}
-
-return (int) msg.wParam;
-}
-
-LRESULT CALLBACK WndProc(HWND hwnd, UINT msg,
-  WPARAM wParam, LPARAM lParam)
-{
-switch(msg)
-{
-  case WM_DESTROY:
-    PostQuitMessage(0);
-    return 0;
-}
-
-return DefWindowProcW(hwnd, msg, wParam, lParam);
-*/
-/*
-HMODULE GetCurrentModule()
-{ // NB: XP+ solution!
-  HMODULE hModule = NULL;
-  GetModuleHandleEx(
-    GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS,
-    (LPCTSTR)GetCurrentModule,
-    &hModule);
-
-  return hModule;
-}
-*/
+//Conversion of C code at http://zetcode.com/gui/winapi/window/ to Rust 1.5
 
 // Copyright © 2015, Peter Atashian
 // Licensed under the MIT License <LICENSE.md>
@@ -108,6 +52,8 @@ impl FromWide for PathBuf {
         <OsString as OsStringExt>::from_wide(wide).into()
     }
 }
+
+
 unsafe extern "system" fn windowproc(handle: HWND, msg: UINT, wparam: WPARAM, lparam: LPARAM) -> LRESULT {
     match msg{
         WM_DESTROY => {
@@ -155,10 +101,10 @@ fn program_main() -> i32 {
                 WS_OVERLAPPEDWINDOW | WS_VISIBLE,
                 100, 100, 350, 250, ptr::null_mut(), ptr::null_mut(), hinstance, ptr::null_mut())
             };
-    unsafe{ShowWindow(hwnd, 9);}
+    unsafe{ShowWindow(hwnd, SW_RESTORE);}
     unsafe{UpdateWindow(hwnd);}
     return unsafe{
-        let mut msg: MSG = MSG{
+        let mut msg: MSG = MSG{ //better way to make a default object of this?
             hwnd: ptr::null_mut(),
             message: 0,
             wParam: 0,
