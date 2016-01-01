@@ -119,7 +119,12 @@ unsafe extern "system" fn windowproc(handle: HWND, msg: UINT, wparam: WPARAM, lp
     return DefWindowProcW(handle, msg, wparam, lparam);
 }
 
-fn main() {
+fn main(){
+    let exit_code = program_main();
+    std::process::exit(exit_code);
+}
+
+fn program_main() -> i32 {
     //get hInstance
     let hinstance:HINSTANCE = unsafe{
         let mut hmodule: HINSTANCE = ptr::null_mut();
@@ -152,7 +157,7 @@ fn main() {
             };
     unsafe{ShowWindow(hwnd, 9);}
     unsafe{UpdateWindow(hwnd);}
-    unsafe{
+    return unsafe{
         let mut msg: MSG = MSG{
             hwnd: ptr::null_mut(),
             message: 0,
@@ -164,7 +169,7 @@ fn main() {
         while GetMessageW(&mut msg as LPMSG, ptr::null_mut(), 0, 0) != 0 {
           DispatchMessageW(&mut msg);
         }
-    }
-    println!("quitting..");
-
+        println!("quitting..");
+        msg.wParam
+    } as i32;
 }
