@@ -7,4 +7,3 @@ authors = ["Jordan Earls <earlz@earlz.net>"]
 winapi="*"
 user32-sys="*"
 kernel32-sys="*"
-encoding = "0.2.*"

@@ -1,20 +1,12 @@
 extern crate winapi;
 extern crate kernel32;
 extern crate user32;
-extern crate encoding;
 
-use winapi::winuser::*;
-use winapi::minwindef::*;
-use winapi::windef::*;
-use winapi::winnt::*;
 use std::ptr;
+use std::mem;
+use winapi::*;
 use kernel32::*;
 use user32::*;
-use std::slice;
-
-use encoding::all::UTF_16LE;
-use encoding::{Encoding, EncoderTrap};
-
 //Conversion of C code at http://zetcode.com/gui/winapi/window/ to Rust 1.5
 
 // Copyright © 2015, Peter Atashian
@@ -80,7 +72,6 @@ fn program_main() -> i32 {
     };
     let c="Helloworld";
     let classname=c.to_wide_null(); //We use this later as a pointer, so make sure it doesn't get thrown away
-    let mut v: Vec<u8> = UTF_16LE.encode(c, EncoderTrap::Strict).unwrap();
     let wc=WNDCLASSW{
         style: CS_HREDRAW | CS_VREDRAW,
         lpfnWndProc: Some(windowproc),
@@ -94,28 +85,18 @@ fn program_main() -> i32 {
         lpszClassName: classname.as_ptr() //OsStr::new(c).encode_wide().chain(Some(0).into_iter()).collect::<Vec<_>>().as_ptr()
     };
     println!("Hello, world! {:p}", hinstance);
-    unsafe{
-        RegisterClassW(&wc);
-    }
-    let hwnd = unsafe{ user32::CreateWindowExW(0, wc.lpszClassName, wc.lpszClassName,
-                WS_OVERLAPPEDWINDOW | WS_VISIBLE,
-                100, 100, 350, 250, ptr::null_mut(), ptr::null_mut(), hinstance, ptr::null_mut())
-            };
-    unsafe{ShowWindow(hwnd, SW_RESTORE);}
-    unsafe{UpdateWindow(hwnd);}
     return unsafe{
-        let mut msg: MSG = MSG{ //better way to make a default object of this?
-            hwnd: ptr::null_mut(),
-            message: 0,
-            wParam: 0,
-            lParam: 0,
-            time: 0,
-            pt: POINT{x: 0, y: 0}
-        };
+        RegisterClassW(&wc);
+        let hwnd = user32::CreateWindowExW(0, wc.lpszClassName, wc.lpszClassName,
+                WS_OVERLAPPEDWINDOW | WS_VISIBLE,
+                100, 100, 350, 250, ptr::null_mut(), ptr::null_mut(), hinstance, ptr::null_mut());
+        ShowWindow(hwnd, SW_RESTORE);
+        UpdateWindow(hwnd);
+        let mut msg: MSG = mem::zeroed();
         while GetMessageW(&mut msg as LPMSG, ptr::null_mut(), 0, 0) != 0 {
           DispatchMessageW(&mut msg);
         }
         println!("quitting..");
-        msg.wParam
-    } as i32;
+        msg.wParam as i32
+    };
 }
