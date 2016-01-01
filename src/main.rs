@@ -72,24 +72,6 @@ HMODULE GetCurrentModule()
   return hModule;
 }
 */
-/*
-trait PointerStuff {
-    fn as_ptr(&self) -> *const u16;
-}
-
-impl PointerStuff for LPCWSTR {
-    fn as_ptr(&self) -> *const u16 {
-        self.str.as_ptr()
-    }
-}
-*/
-/*
-impl<T: Into<OsString>> From<T> for LPCWSTR {
-    fn from(source: T) -> LPCWSTR {
-        LPCWSTR { str: source.into().as_os_str().encode_wide().chain(Some(0).into_iter()).collect::<Vec<_>>() }
-    }
-}
-*/
 
 // Copyright © 2015, Peter Atashian
 // Licensed under the MIT License <LICENSE.md>
@@ -146,6 +128,7 @@ fn main() {
         hmodule
     };
     let c="Helloworld";
+    let classname=c.to_wide_null(); //We use this later as a pointer, so make sure it doesn't get thrown away
     let mut v: Vec<u8> = UTF_16LE.encode(c, EncoderTrap::Strict).unwrap();
     let wc=WNDCLASSW{
         style: CS_HREDRAW | CS_VREDRAW,
@@ -157,7 +140,7 @@ fn main() {
         hCursor: unsafe{LoadCursorW(ptr::null_mut(), IDC_ARROW)},
         hbrBackground: unsafe{GetSysColorBrush(COLOR_3DFACE)},
         lpszMenuName: ptr::null_mut(),
-        lpszClassName: OsStr::new(c).encode_wide().chain(Some(0).into_iter()).collect::<Vec<_>>().as_ptr()
+        lpszClassName: classname.as_ptr() //OsStr::new(c).encode_wide().chain(Some(0).into_iter()).collect::<Vec<_>>().as_ptr()
     };
     println!("Hello, world! {:p}", hinstance);
     unsafe{
